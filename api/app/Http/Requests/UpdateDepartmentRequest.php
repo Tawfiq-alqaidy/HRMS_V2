@@ -22,7 +22,9 @@ class UpdateDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'sometimes|string|max:255|unique:departments,name,' . $this->route('department'),
+            'description' => 'sometimes|nullable|string|max:1000',
+            'manager_employee_id' => 'sometimes|nullable|exists:employees,id',
         ];
     }
 }

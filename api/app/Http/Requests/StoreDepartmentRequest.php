@@ -22,7 +22,9 @@ class StoreDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|max:255|unique:departments,name',
+            'description' => 'nullable|string|max:1000',
+            'manager_employee_id' => 'nullable|exists:employees,id',
         ];
     }
 }

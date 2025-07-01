@@ -10,5 +10,6 @@ Route::prefix('employees')->group(function () {
     Route::patch('/{id}', [EmployeeController::class, 'update'])->name('employees.update');
     Route::patch('/archiving/{id}', [EmployeeController::class, 'archiving'])->name('employees.archiving');
     Route::patch('/restoring/{id}', [EmployeeController::class, 'restore'])->name('employees.restore');
+    Route::get('/archived', [EmployeeController::class, 'archivedEmployees'])->name('employees.archivedEmployees');
     Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 });

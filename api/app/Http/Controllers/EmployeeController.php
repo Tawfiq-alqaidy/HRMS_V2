@@ -96,6 +96,18 @@ class EmployeeController
         return response()->json(['message' => 'Employee restored successfully.']);
     }
 
+    public function archivedEmployees()
+    {
+        $archivedEmployees = Employee::with(['user:id', 'department:id,name'])
+            ->where('isActive', 0)
+            ->get();
+
+        if ($archivedEmployees->isEmpty()) {
+            return response()->json(['message' => 'No archived employees found'], 404);
+        }
+        return EmployeeResource::collection($archivedEmployees);
+    }
+
     public function destroy(string $id)
     {
         $employee = Employee::findOrFail($id);

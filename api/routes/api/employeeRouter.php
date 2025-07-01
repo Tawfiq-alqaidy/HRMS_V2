@@ -1,0 +1,13 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EmployeeController;
+
+Route::prefix('employees')->group(function () {
+    Route::get('/all', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::post('/create', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/{id}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::patch('/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::patch('/archiving/{id}', [EmployeeController::class, 'archiving'])->name('employees.archiving');
+    Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+});

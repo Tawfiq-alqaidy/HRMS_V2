@@ -48,6 +48,9 @@ class DepartmentController extends Controller
     public function destroy($id)
     {
         $department = Department::where('id', $id)->firstOrFail();
+        if ($department->employees()->count() > 0  || $department == null) {
+            return response()->json(['message' => 'Cannot delete department with employees.'], 400);
+        }
         $department->delete();
         return response()->json(['message' => 'Department deleted successfully.']);
     }

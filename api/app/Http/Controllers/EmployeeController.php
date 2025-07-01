@@ -93,7 +93,7 @@ class EmployeeController
             $employee->user->isActive = 1;
             $employee->user->save();
         }
-        return response()->json(['message' => 'Employee restored successfully.']);
+        return response()->json(['message' => 'Employee restored successfully.'], 200);
     }
 
     public function archivedEmployees()
@@ -112,6 +112,6 @@ class EmployeeController
     {
         $employee = Employee::findOrFail($id);
         $employee->delete();
-        return response()->json(['message' => 'Employee deleted successfully.']);
+        return response()->json(['message' => 'Employee deleted successfully.'], 200);
     }
 }

@@ -83,6 +83,19 @@ class EmployeeController
         return response()->json(['message' => 'Employee archived successfully.']);
     }
 
+    public function restore(string $id)
+    {
+        $employee = Employee::with('user')->findOrFail($id);
+        $employee->isActive = 1;
+        $employee->save();
+        // Restore related user
+        if ($employee->user) {
+            $employee->user->isActive = 1;
+            $employee->user->save();
+        }
+        return response()->json(['message' => 'Employee restored successfully.']);
+    }
+
     public function destroy(string $id)
     {
         $employee = Employee::findOrFail($id);

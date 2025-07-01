@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 
 class DepartmentController
 {
+    public function ping()
+    {
+        return response()->json(['message' => 'pong']);
+    }
     /**
      * Display a listing of the resource.
      */

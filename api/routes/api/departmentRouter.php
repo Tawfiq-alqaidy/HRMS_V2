@@ -9,4 +9,5 @@ Route::prefix('departments')->group(function () {
     Route::get('/{id}', [DepartmentController::class, 'show'])->name('departments.show');
     Route::patch('/{id}', [DepartmentController::class, 'update'])->name('departments.update');
     Route::delete('/{id}', [DepartmentController::class, 'destroy'])->name('departments.destroy');
+    Route::get('/{id}/employees', [DepartmentController::class, 'employees'])->name('departments.employees');
 });

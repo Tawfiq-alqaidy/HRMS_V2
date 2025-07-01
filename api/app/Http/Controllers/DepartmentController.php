@@ -51,4 +51,10 @@ class DepartmentController extends Controller
         $department->delete();
         return response()->json(['message' => 'Department deleted successfully.']);
     }
+
+    public function employees($id)
+    {
+        $department = Department::with('employees')->where('id', $id)->firstOrFail();
+        return new DepartmentResource($department);
+    }
 }

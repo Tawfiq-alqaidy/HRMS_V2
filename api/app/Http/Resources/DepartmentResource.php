@@ -14,20 +14,22 @@ class DepartmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // Determine the route or action name
         $routeName = $request->route() ? $request->route()->getName() : null;
 
-        // For index and show: show manager and employees count only
+        // For index and show: show manager and employees count only, include manager as employee id
         if (in_array($routeName, ['departments.index', 'departments.show'])) {
             return [
                 'id' => $this->id,
                 'name' => $this->name,
                 'description' => $this->description,
-                'manager_employee_id' => $this->manager_employee_id,
-                'manager' => $this->manager ? [
-                    'id' => $this->manager->id,
-                    'name' => $this->manager->name,
-                ] : null,
+                'manager' => ($this->manager && $this->manager->full_name)
+                    ? [
+                        'id' => $this->manager->id,
+                        'name' => $this->manager->full_name,
+                    ]
+                    : [
+                        'message' => 'Without manager'
+                    ],
                 'employees_count' => $this->employees_count ?? $this->employees()->count(),
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
@@ -42,6 +44,8 @@ class DepartmentResource extends JsonResource
                 'employees' => EmployeeResource::collection($this->whenLoaded('employees')),
             ];
         }
+
+
 
         // Default: full resource
         return parent::toArray($request);

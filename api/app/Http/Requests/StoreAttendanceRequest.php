@@ -11,7 +11,7 @@ class StoreAttendanceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'employee_id' => 'required|exists:employees,id',
+            'date' => 'required|date',
+            'check_in_time' => 'required|date_format:H:i:s',
+            'check_out_time' => 'nullable|date_format:H:i:s|after:check_in_time',
         ];
     }
 }

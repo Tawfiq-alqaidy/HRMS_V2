@@ -3,62 +3,103 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Resources\AttendanceResource;
+use App\Http\Requests\StoreAttendanceRequest;
+use App\Http\Requests\UpdateAttendanceRequest;
+use App\Models\Attendance;
+use App\Models\Employee;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function ping()
+    {
+        return response()->json(['message' => 'Attendance service is running'], 200);
+    }
+
     public function index()
     {
-        //
+        $attendance = Attendance::with('employee')->get();
+        if ($attendance->isEmpty()) {
+            return response()->json(['message' => 'No attendance records found'], 404);
+        }
+        return AttendanceResource::collection($attendance);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function startWorkDay()
     {
-        //
+        $today = Carbon::now()->format('Y-m-d');
+
+        // Check if work day already started
+        if (Attendance::where('date', $today)->exists()) {
+            return response()->json(['message' => 'Work day already started.',], 400);
+        }
+
+        $employees = Employee::all();
+        if ($employees->isEmpty()) {
+            return response()->json(['message' => 'No employees found.',], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            $attendance = $employees->map(function ($employee) use ($today) {
+                Attendance::create([
+                    'employee_id' => $employee->id,
+                    'date' => $today
+                ]);
+                return [
+                    'EmployeeID' => $employee->EmployeeID,
+                    'EmployeeName' => $employee->FullName,
+                    'AttendanceDate' => $today
+                ];
+            });
+
+            DB::commit();
+
+            return response()->json(['message' => 'Started work day successfully.',], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to start work day.',
+                'error'   => app()->environment('production') ? null : $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     */
+
+
     public function show(string $id)
     {
-        //
+        $attendance = Attendance::with('employee')->find($id);
+        if (!$attendance) {
+            return response()->json(['message' => 'Attendance record not found'], 404);
+        }
+        return new AttendanceResource($attendance);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+
+    public function update(UpdateAttendanceRequest $request, string $id)
     {
-        //
+        $attendance = Attendance::find($id);
+        if (!$attendance) {
+            return response()->json(['message' => 'Attendance record not found'], 404);
+        }
+
+        $attendance->update($request->validated());
+        return response()->json(['message' => 'Attendance record updated successfully',], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $attendance = Attendance::find($id);
+        if (!$attendance) {
+            return response()->json(['message' => 'Attendance record not found'], 404);
+        }
+
+        $attendance->delete();
+        return response()->json(['message' => 'Attendance record deleted successfully'], 200);
     }
 }

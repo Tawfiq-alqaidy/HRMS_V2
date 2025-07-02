@@ -11,7 +11,7 @@ class UpdatePayrollRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,12 @@ class UpdatePayrollRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'employee_id' => 'sometimes|exists:employees,EmployeeID',
+            'generated_at' => 'sometimes|date',
+            'basic_salary' => 'sometimes|numeric|min:0',
+            'deduction' => 'nullable|numeric|min:0',
+            'bonus' => 'nullable|numeric|min:0',
+            'net_salary' => 'sometimes|numeric|min:0',
         ];
     }
 }

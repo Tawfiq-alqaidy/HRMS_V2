@@ -11,7 +11,7 @@ class StorePayrollRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,12 @@ class StorePayrollRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'employee_id' => 'required|exists:employees,EmployeeID',
+            'generated_at' => 'required|date',
+            'basic_salary' => 'required|numeric|min:0',
+            'deduction' => 'nullable|numeric|min:0',
+            'bonus' => 'nullable|numeric|min:0',
+            'net_salary' => 'required|numeric|min:0',
         ];
     }
 }

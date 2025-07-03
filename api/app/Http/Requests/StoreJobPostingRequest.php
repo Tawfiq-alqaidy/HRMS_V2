@@ -11,7 +11,7 @@ class StoreJobPostingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,13 @@ class StoreJobPostingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'job_title' => 'required|string|max:255',
+            'job_description' => 'required|string',
+            'employment_type' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'salary_range' => 'nullable|string|max:255',
+            'application_deadline' => 'required|date',
+            'isActive' => 'boolean',
         ];
     }
 }

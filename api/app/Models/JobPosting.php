@@ -19,6 +19,9 @@ class JobPosting extends Model
         'isActive'
     ];
 
+    // protected $table = 'job_postings';
+    public $timestamps = false;
+
     public function applications()
     {
         return $this->hasMany(JobApplication::class);

@@ -3,31 +3,34 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\JobPosting;
+use App\Http\Resources\JobPostingResource;
+use App\Http\Requests\StoreJobPostingRequest;
+use App\Http\Requests\UpdateJobPostingRequest;
 
 class JobPostingController
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        //
+        $today = now()->toDateString();
+        $jobPostings = JobPosting::where('isActive', 1)
+            ->whereDate('application_deadline', '>=', $today)
+            ->get();
+        if ($jobPostings->isEmpty()) {
+            return response()->json(['message' => 'No job postings found.'], 404);
+        }
+        return JobPostingResource::collection($jobPostings);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // theres a pug here
+    public function store(StoreJobPostingRequest $request)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        $validated = $request->validated();
+        $jobPosting = JobPosting::create($validated);
+        return response()->json([
+            'message' => 'Job posting created successfully.',
+        ], 201);
     }
 
     /**
@@ -35,30 +38,37 @@ class JobPostingController
      */
     public function show(string $id)
     {
-        //
+        $jobPosting = JobPosting::findOrFail($id);
+        if (!$jobPosting) {
+            return response()->json(['message' => 'Job posting not found.'], 404);
+        }
+        return new JobPostingResource($jobPosting);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+
+    public function update(UpdateJobPostingRequest $request, string $id)
     {
-        //
+        $jobPosting = JobPosting::findOrFail($id);
+        if (!$jobPosting) {
+            return response()->json(['message' => 'Job posting not found.'], 404);
+        }
+        $validated = $request->validated();
+        $jobPosting->update($validated);
+        return response()->json([
+            'message' => 'Job posting updated successfully.',
+        ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $jobPosting = JobPosting::findOrFail($id);
+        if (!$jobPosting) {
+            return response()->json(['message' => 'Job posting not found.'], 404);
+        }
+        $jobPosting->delete();
+        return response()->json([
+            'message' => 'Job posting deleted successfully.',
+        ], 200);
     }
 }

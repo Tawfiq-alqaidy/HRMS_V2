@@ -14,6 +14,15 @@ class AdjustmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'employee_id' => $this->employee_id,
+            'type' => $this->type,
+            'amount' => $this->amount,
+            'reason' => $this->reason,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'employee' => new EmployeeResource($this->whenLoaded('employee')),
+        ];
     }
 }

@@ -11,7 +11,7 @@ class StoreAdjustmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreAdjustmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'employee_id' => 'required|exists:employees,id',
+            'type' => 'required|string|max:255',
+            'amount' => 'required|numeric',
+            'reason' => 'nullable|string|max:1000',
         ];
     }
 }

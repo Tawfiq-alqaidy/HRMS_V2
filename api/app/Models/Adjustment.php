@@ -10,6 +10,8 @@ class Adjustment extends Model
     use HasFactory;
 
     protected $fillable = ['employee_id', 'type', 'amount', 'reason'];
+    protected $table = 'adjustments';
+    public $timestamps = false;
 
     public function employee()
     {

@@ -3,31 +3,38 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreJobApplicationRequest;
+use App\Http\Requests\UpdateJobApplicationRequest;
+use App\Http\Resources\JobApplicationResource;
+use App\Models\JobApplication;
+use App\Models\JobPosting;
 
 class JobApplicationController
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
-        //
+        $applications = JobApplication::with('jobPosting')->get();
+        if ($applications->isEmpty()) {
+            return response()->json(['message' => 'No job applications found'], 404);
+        }
+        return JobApplicationResource::collection($applications);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreJobApplicationRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $jobPosting = JobPosting::find($validated['job_posting_id']);
+        if (!$jobPosting) {
+            return response()->json(['message' => 'Job posting not found'], 404);
+        }
+
+        $validated['status'] = 'pending';
+        $application = JobApplication::create($validated);
+
+        return response()->json(['message' => 'Job application created successfully.',], 201);
     }
 
     /**
@@ -35,23 +42,25 @@ class JobApplicationController
      */
     public function show(string $id)
     {
-        //
+        $application = JobApplication::with('jobPosting')->find($id);
+        if (!$application) {
+            return response()->json(['message' => 'Job application not found'], 404);
+        }
+        return new JobApplicationResource($application);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(UpdateJobApplicationRequest $request, string $id)
     {
-        //
+        $application = JobApplication::find($id);
+        if (!$application) {
+            return response()->json(['message' => 'Job application not found'], 404);
+        }
+
+        $validated = $request->validated();
+        $application->update($validated);
+
+        return response()->json(['message' => 'Job application updated successfully.'], 200);
     }
 
     /**
@@ -59,6 +68,12 @@ class JobApplicationController
      */
     public function destroy(string $id)
     {
-        //
+        $application = JobApplication::find($id);
+        if (!$application) {
+            return response()->json(['message' => 'Job application not found'], 404);
+        }
+
+        $application->delete();
+        return response()->json(['message' => 'Job application deleted successfully.'], 200);
     }
 }

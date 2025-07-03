@@ -10,6 +10,7 @@ class JobApplication extends Model
     use HasFactory;
 
     protected $fillable = ['job_posting_id', 'full_name', 'email', 'phone', 'cv_file_path', 'status'];
+    public $timestamps = false;
 
     public function jobPosting()
     {

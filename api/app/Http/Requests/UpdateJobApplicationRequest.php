@@ -11,7 +11,7 @@ class UpdateJobApplicationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,12 @@ class UpdateJobApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'job_posting_id' => 'sometimes|required|exists:job_postings,id',
+            'full_name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|max:255',
+            'phone' => 'sometimes|required|string|max:20',
+            'cv_file_path' => 'sometimes|required|string|max:255',
+            'status' => 'sometimes|required|string|max:50',
         ];
     }
 }

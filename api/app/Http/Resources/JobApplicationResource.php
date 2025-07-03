@@ -14,6 +14,14 @@ class JobApplicationResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'job_posting_id' => $this->job_posting_id,
+            'full_name' => $this->full_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'cv_file_path' => $this->cv_file_path,
+            'status' => $this->status,
+        ];
     }
 }

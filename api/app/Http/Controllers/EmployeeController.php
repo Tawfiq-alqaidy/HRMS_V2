@@ -28,10 +28,6 @@ class EmployeeController
             ->where('isActive', $isActive)
             ->paginate(20);
 
-        if ($employees->isEmpty()) {
-            return response()->json([], 200);
-        }
-
         $data = EmployeeResource::collection($employees)->resolve();
         return response()->json([
             'data' => $data,

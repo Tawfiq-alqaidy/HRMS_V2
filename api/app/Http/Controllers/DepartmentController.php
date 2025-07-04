@@ -16,7 +16,7 @@ class DepartmentController extends Controller
     {
         $departments = Department::with('manager', 'employees')->withCount('employees')->get();
         if ($departments->isEmpty()) {
-            return response()->json(['message' => 'No departments found.'], 404);
+            return response()->json(['data' => []], 200);
         }
         return DepartmentResource::collection($departments);
     }

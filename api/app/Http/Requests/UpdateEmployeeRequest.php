@@ -28,13 +28,16 @@ class UpdateEmployeeRequest extends FormRequest
             'birth_date' => 'sometimes|date',
             'gender' => 'sometimes|in:male,female,other',
             'phone' => 'sometimes|nullable|string|max:20',
-            'picture' => 'sometimes|nullable|string|max:255',
+            'picture' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'basic_salary' => 'sometimes|numeric|min:0',
             'bank_name' => 'sometimes|nullable|string|max:255',
             'bank_branch' => 'sometimes|nullable|string|max:255',
             'bank_account_number' => 'sometimes|nullable|string|max:255',
-            'resume_file' => 'sometimes|nullable|string|max:255',
+            'resume_file' => 'sometimes|nullable|file|mimes:pdf,doc,docx|max:5120',
             'isActive' => 'sometimes|boolean',
+            'email' => 'sometimes|string|email|max:255',
+            'password' => 'sometimes|nullable|string|min:6',
+            'role' => 'sometimes|string|in:admin,hr,employee',
         ];
     }
 }

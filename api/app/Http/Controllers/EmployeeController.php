@@ -133,9 +133,79 @@ class EmployeeController
     public function update(UpdateEmployeeRequest $request, string $id)
     {
         $employee = Employee::findOrFail($id);
-        $employee->update($request->validated());
-        $employee->load(['user:id', 'department:id,name']);
-        return response()->json(['message' => 'Employee updated successfully.'], 200);
+        $validated = $request->validated();
+
+        try {
+            // Handle file uploads
+            $picturePath = $employee->picture; // Keep existing picture if no new one
+            $resumePath = $employee->resume_file; // Keep existing resume if no new one
+
+            // Upload new profile photo if provided
+            if ($request->hasFile('picture')) {
+                // Delete old picture if exists
+                if ($employee->picture && Storage::disk('public')->exists($employee->picture)) {
+                    Storage::disk('public')->delete($employee->picture);
+                }
+                $picturePath = $request->file('picture')->store('employees/photos', 'public');
+            }
+
+            // Upload new CV file if provided
+            if ($request->hasFile('resume_file')) {
+                // Delete old resume if exists
+                if ($employee->resume_file && Storage::disk('public')->exists($employee->resume_file)) {
+                    Storage::disk('public')->delete($employee->resume_file);
+                }
+                $resumePath = $request->file('resume_file')->store('employees/cvs', 'public');
+            }
+
+            // Update user data if provided
+            if ($employee->user && (isset($validated['email']) || isset($validated['password']) || isset($validated['role']))) {
+                $userUpdateData = [];
+
+                if (isset($validated['email'])) {
+                    $userUpdateData['email'] = $validated['email'];
+                }
+
+                if (isset($validated['password']) && !empty($validated['password'])) {
+                    $userUpdateData['password'] = bcrypt($validated['password']);
+                }
+
+                if (isset($validated['role'])) {
+                    $userUpdateData['role'] = $validated['role'];
+                }
+
+                if (isset($validated['isActive'])) {
+                    $userUpdateData['isActive'] = $validated['isActive'];
+                }
+
+                if (!empty($userUpdateData)) {
+                    $employee->user->update($userUpdateData);
+                }
+            }
+
+            // Prepare employee data (exclude user fields and files)
+            $employeeData = collect($validated)
+                ->except(['email', 'password', 'role', 'picture', 'resume_file'])
+                ->toArray();
+
+            // Update file paths
+            $employeeData['picture'] = $picturePath;
+            $employeeData['resume_file'] = $resumePath;
+
+            // Update employee
+            $employee->update($employeeData);
+            $employee->load(['user:id,email', 'department:id,name']);
+
+            return response()->json([
+                'message' => 'Employee updated successfully.',
+                'data' => new EmployeeResource($employee)
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update employee.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function archiving(string $id)

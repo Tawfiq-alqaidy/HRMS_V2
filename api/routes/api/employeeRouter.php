@@ -11,4 +11,9 @@ Route::prefix('employees')->group(function () {
     Route::patch('/archiving/{id}', [EmployeeController::class, 'archiving'])->name('employees.archiving');
     Route::patch('/restoring/{id}', [EmployeeController::class, 'restore'])->name('employees.restore');
     Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+
+    // Handle OPTIONS requests for CORS
+    Route::options('/{any?}', function () {
+        return response('', 200);
+    })->where('any', '.*');
 });

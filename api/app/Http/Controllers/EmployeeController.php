@@ -44,7 +44,7 @@ class EmployeeController
         // Create user
         $user = User::create([
             'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
+            'password' => bcrypt('123456'), // Default password, can be changed later
             'role' => $validated['role'] ?? 'employee',
             'isActive' => $validated['isActive'] ?? true,
         ]);

@@ -24,7 +24,7 @@ class StoreEmployeeRequest extends FormRequest
         return [
             // User fields
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'nullable|string|min:6',
             'role' => 'sometimes|string',
             // Employee fields
             'department_id' => 'required|exists:departments,id',

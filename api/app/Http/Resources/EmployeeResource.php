@@ -19,6 +19,7 @@ class EmployeeResource extends JsonResource
             'department_name' => $this->department ? $this->department->name : "whithout department",
             'full_name' => $this->full_name,
             'phone' => $this->phone,
+            'email' => $this->user ? $this->user->email : 'No email',
             'status' => $this->isActive ? 'active' : 'inactive',
         ];
     }

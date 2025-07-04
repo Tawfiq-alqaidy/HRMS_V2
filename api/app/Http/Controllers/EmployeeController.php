@@ -24,7 +24,7 @@ class EmployeeController
 
         $isActive = $filter === 'active' ? 1 : 0;
 
-        $employees = Employee::with(['user:id', 'department:id,name'])
+        $employees = Employee::with(['user:id,email', 'department:id,name'])
             ->where('isActive', $isActive)
             ->paginate(20);
 

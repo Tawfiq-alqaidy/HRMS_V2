@@ -15,6 +15,7 @@ class EmployeeController
     public function index()
     {
         $filter = request()->query('filter', 'active');
+        $search = request()->query('search', '');
 
         if (!in_array($filter, ['active', 'inactive'])) {
             return response()->json([
@@ -24,9 +25,26 @@ class EmployeeController
 
         $isActive = $filter === 'active' ? 1 : 0;
 
-        $employees = Employee::with(['user:id,email', 'department:id,name'])
-            ->where('isActive', $isActive)
-            ->paginate(20);
+        $query = Employee::with(['user:id,email', 'department:id,name'])
+            ->where('isActive', $isActive);
+
+        if (!empty($search)) {
+            $search = trim($search);
+
+            $searchTerms = array_filter(explode(' ', $search), function ($term) {
+                return !empty(trim($term));
+            });
+
+            if (!empty($searchTerms)) {
+                $query->where(function ($q) use ($searchTerms) {
+                    foreach ($searchTerms as $term) {
+                        $q->where('full_name', 'LIKE', '%' . $term . '%');
+                    }
+                });
+            }
+        }
+
+        $employees = $query->paginate(20);
 
         $data = EmployeeResource::collection($employees)->resolve();
         return response()->json([

@@ -32,12 +32,12 @@ class StoreEmployeeRequest extends FormRequest
             'birth_date' => 'required|date',
             'gender' => 'required|in:male,female,other',
             'phone' => 'required|string|max:20',
-            'picture' => 'nullable|string|max:255',
+            'picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'basic_salary' => 'required|numeric|min:0',
             'bank_name' => 'nullable|string|max:255',
             'bank_branch' => 'nullable|string|max:255',
             'bank_account_number' => 'nullable|string|max:255',
-            'resume_file' => 'nullable|string|max:255',
+            'resume_file' => 'required|file|mimes:pdf,doc,docx|max:5120',
             'isActive' => 'boolean',
         ];
     }

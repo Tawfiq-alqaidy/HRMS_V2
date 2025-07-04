@@ -8,6 +8,7 @@ use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeController
 {
@@ -59,25 +60,60 @@ class EmployeeController
     {
         $validated = $request->validated();
 
-        // Create user
-        $user = User::create([
-            'email' => $validated['email'],
-            'password' => bcrypt('123456'), // Default password, can be changed later
-            'role' => $validated['role'] ?? 'employee',
-            'isActive' => $validated['isActive'] ?? true,
-        ]);
+        try {
+            // Handle file uploads
+            $picturePath = null;
+            $resumePath = null;
 
-        // Prepare employee data (exclude user fields)
-        $employeeData = collect($validated)
-            ->except(['email', 'password', 'role'])
-            ->toArray();
-        $employeeData['user_id'] = $user->id;
+            // Upload profile photo
+            if ($request->hasFile('picture')) {
+                $picturePath = $request->file('picture')->store('employees/photos', 'public');
+            }
 
-        // Create employee
-        $employee = Employee::create($employeeData);
-        $employee->load(['user:id', 'department:id,name']);
+            // Upload CV file
+            if ($request->hasFile('resume_file')) {
+                $resumePath = $request->file('resume_file')->store('employees/cvs', 'public');
+            }
 
-        return response()->json(['message' => 'Employee created successfully.',], 201);
+            // Create user
+            $user = User::create([
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password'] ?? '123456'), // Use provided password or default
+                'role' => $validated['role'] ?? 'employee',
+                'isActive' => $validated['isActive'] ?? true,
+            ]);
+
+            // Prepare employee data (exclude user fields and files)
+            $employeeData = collect($validated)
+                ->except(['email', 'password', 'role', 'picture', 'resume_file'])
+                ->toArray();
+
+            $employeeData['user_id'] = $user->id;
+            $employeeData['picture'] = $picturePath;
+            $employeeData['resume_file'] = $resumePath;
+
+            // Create employee
+            $employee = Employee::create($employeeData);
+            $employee->load(['user:id,email', 'department:id,name']);
+
+            return response()->json([
+                'message' => 'Employee created successfully.',
+                'data' => new EmployeeResource($employee)
+            ], 201);
+        } catch (\Exception $e) {
+            // Clean up uploaded files if employee creation fails
+            if ($picturePath && Storage::disk('public')->exists($picturePath)) {
+                Storage::disk('public')->delete($picturePath);
+            }
+            if ($resumePath && Storage::disk('public')->exists($resumePath)) {
+                Storage::disk('public')->delete($resumePath);
+            }
+
+            return response()->json([
+                'message' => 'Failed to create employee.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 

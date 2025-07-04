@@ -27,9 +27,7 @@ class DepartmentResource extends JsonResource
                         'id' => $this->manager->id,
                         'name' => $this->manager->full_name,
                     ]
-                    : [
-                        'message' => 'Without manager'
-                    ],
+                    : null,
                 'employees_count' => $this->employees_count ?? $this->employees()->count(),
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,

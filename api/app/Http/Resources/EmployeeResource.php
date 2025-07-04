@@ -21,7 +21,7 @@ class EmployeeResource extends JsonResource
             'department' => $this->department ? [
                 'id' => $this->department->id,
                 'name' => $this->department->name
-            ] : 'without department',
+            ] : null,
             'full_name' => $this->full_name,
             'phone' => $this->phone,
             'email' => $this->user ? $this->user->email : 'No email',

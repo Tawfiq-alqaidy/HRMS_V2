@@ -20,12 +20,11 @@ class EmployeeController
             return response()->json(['message' => 'No employees found'], 404);
         }
 
-        return EmployeeResource::collection($employees)
-            ->additional([
-                'meta' => [
-                    'last_page' => $employees->lastPage(),
-                ]
-            ]);
+        $data = EmployeeResource::collection($employees)->resolve();
+        return response()->json([
+            'data' => $data,
+            'last_page' => $employees->lastPage(),
+        ]);
     }
 
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EmployeeController;
 
 Route::prefix('employees')->group(function () {
-    Route::get('/all', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/', [EmployeeController::class, 'index'])->name('employees.index');
     Route::get('/{id}', [EmployeeController::class, 'show'])->name('employees.show');
     Route::post('/create', [EmployeeController::class, 'store'])->name('employees.store');
     Route::patch('/{id}', [EmployeeController::class, 'update'])->name('employees.update');

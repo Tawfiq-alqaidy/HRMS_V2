@@ -14,22 +14,22 @@ class EmployeeController
 
     public function index()
     {
-        $status = request()->query('status', 'active');
+        $filter = request()->query('filter', 'active');
 
-        if (!in_array($status, ['active', 'inactive'])) {
+        if (!in_array($filter, ['active', 'inactive'])) {
             return response()->json([
-                'message' => 'Invalid status parameter. Allowed values are: active, inactive.'
+                'message' => 'Invalid filter parameter. Allowed values are: active, inactive.'
             ], 422);
         }
 
-        $isActive = $status === 'active' ? 1 : 0;
+        $isActive = $filter === 'active' ? 1 : 0;
 
         $employees = Employee::with(['user:id', 'department:id,name'])
             ->where('isActive', $isActive)
             ->paginate(20);
 
         if ($employees->isEmpty()) {
-            return response()->json(['message' => 'No employees found'], 404);
+            return response()->json([], 200);
         }
 
         $data = EmployeeResource::collection($employees)->resolve();

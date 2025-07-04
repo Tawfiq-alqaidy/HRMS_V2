@@ -18,10 +18,10 @@ class EmployeeResource extends JsonResource
 
         $baseData = [
             'id' => $this->id,
-            'department' => $this->department ? [
+            'department' => [
                 'id' => $this->department->id,
                 'name' => $this->department->name
-            ] : null,
+            ],
             'full_name' => $this->full_name,
             'phone' => $this->phone,
             'email' => $this->user ? $this->user->email : 'No email',

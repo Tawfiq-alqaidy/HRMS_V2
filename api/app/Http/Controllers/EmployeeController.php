@@ -14,7 +14,19 @@ class EmployeeController
 
     public function index()
     {
-        $employees = Employee::with(['user:id', 'department:id,name'])->paginate(20);
+        $status = request()->query('status', 'active');
+
+        if (!in_array($status, ['active', 'inactive'])) {
+            return response()->json([
+                'message' => 'Invalid status parameter. Allowed values are: active, inactive.'
+            ], 422);
+        }
+
+        $isActive = $status === 'active' ? 1 : 0;
+
+        $employees = Employee::with(['user:id', 'department:id,name'])
+            ->where('isActive', $isActive)
+            ->paginate(20);
 
         if ($employees->isEmpty()) {
             return response()->json(['message' => 'No employees found'], 404);
@@ -26,6 +38,7 @@ class EmployeeController
             'last_page' => $employees->lastPage(),
         ]);
     }
+
 
 
     public function store(StoreEmployeeRequest $request)
@@ -101,17 +114,6 @@ class EmployeeController
         return response()->json(['message' => 'Employee restored successfully.'], 200);
     }
 
-    public function archivedEmployees()
-    {
-        $archivedEmployees = Employee::with(['user:id', 'department:id,name'])
-            ->where('isActive', 0)
-            ->get();
-
-        if ($archivedEmployees->isEmpty()) {
-            return response()->json(['message' => 'No archived employees found'], 404);
-        }
-        return EmployeeResource::collection($archivedEmployees);
-    }
 
     public function destroy(string $id)
     {

@@ -14,12 +14,18 @@ class EmployeeController
 
     public function index()
     {
-        $employees = Employee::with(['user:id', 'department:id,name'])->get();
+        $employees = Employee::with(['user:id', 'department:id,name'])->paginate(20);
 
         if ($employees->isEmpty()) {
             return response()->json(['message' => 'No employees found'], 404);
         }
-        return EmployeeResource::collection($employees);
+
+        return EmployeeResource::collection($employees)
+            ->additional([
+                'meta' => [
+                    'last_page' => $employees->lastPage(),
+                ]
+            ]);
     }
 
 

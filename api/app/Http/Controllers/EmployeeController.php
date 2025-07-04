@@ -119,7 +119,7 @@ class EmployeeController
 
     public function show(string $id)
     {
-        $employee = Employee::with(['user:id', 'department:id,name'])->findOrFail($id);
+        $employee = Employee::with(['user:id,email', 'department:id,name'])->findOrFail($id);
 
         if (!$employee) {
             return response()->json(['message' => 'Employee not found'], 404);

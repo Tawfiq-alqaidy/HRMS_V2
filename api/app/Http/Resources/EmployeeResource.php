@@ -14,13 +14,33 @@ class EmployeeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $isDetailedView = $request->route() && $request->route()->getActionMethod() === 'show';
+
+        $baseData = [
             'id' => $this->id,
-            'department_name' => $this->department ? $this->department->name : "whithout department",
+            'department' => $this->department ? [
+                'id' => $this->department->id,
+                'name' => $this->department->name
+            ] : 'without department',
             'full_name' => $this->full_name,
             'phone' => $this->phone,
             'email' => $this->user ? $this->user->email : 'No email',
             'status' => $this->isActive ? 'active' : 'inactive',
         ];
+
+        if ($isDetailedView) {
+            return array_merge($baseData, [
+                'birth_date' => $this->birth_date,
+                'gender' => $this->gender,
+                'picture' => $this->picture,
+                'basic_salary' => $this->basic_salary,
+                'bank_name' => $this->bank_name,
+                'bank_branch' => $this->bank_branch,
+                'bank_account_number' => $this->bank_account_number,
+                'resume_file' => $this->resume_file,
+            ]);
+        }
+
+        return $baseData;
     }
 }

@@ -17,6 +17,7 @@ class EmployeeController
     {
         $filter = request()->query('filter', 'active');
         $search = request()->query('search', '');
+        $department = request()->query('department');
 
         if (!in_array($filter, ['active', 'inactive'])) {
             return response()->json([
@@ -27,11 +28,13 @@ class EmployeeController
         $isActive = $filter === 'active' ? 1 : 0;
 
         $query = Employee::with(['user:id,email', 'department:id,name'])
-            ->where('isActive', $isActive);
+            ->where('isActive', $isActive)
+            ->when($department, function ($q) use ($department) {
+                $q->where('department_id', $department);
+            });
 
         if (!empty($search)) {
             $search = trim($search);
-
             $searchTerms = array_filter(explode(' ', $search), function ($term) {
                 return !empty(trim($term));
             });

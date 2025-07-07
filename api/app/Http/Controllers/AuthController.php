@@ -35,8 +35,19 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $employeeId = null;
+        $userId = $user->id;
+        if ($user->role === 'employee') {
+            // Assuming there is a relation or field to get employee id from user
+            $employee = \App\Models\Employee::where('user_id', $user->id)->first();
+            $employeeId = $employee ? $employee->id : null;
+        }
         return response()->json([
             'token' => $token,
+            'user_role' => $user->role,
+            'user_id' => $userId,
+            'employee_id' => $employeeId,
+            'user_email' => $user->email,
         ]);
     }
 

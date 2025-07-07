@@ -13,18 +13,30 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceController
 {
-    public function ping()
-    {
-        return response()->json(['message' => 'Attendance service is running'], 200);
-    }
 
-    public function index()
+    public function index(Request $request)
     {
-        $attendance = Attendance::with('employee')->get();
-        if ($attendance->isEmpty()) {
-            return response()->json(['message' => 'No attendance records found'], 404);
+        $workDay = $request->query('work_day');
+
+        $query = Attendance::with('employee');
+
+        if ($workDay) {
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $workDay)) {
+                return response()->json([
+                    'message' => 'Invalid date format. Please use YYYY-MM-DD format.'
+                ], 422);
+            }
+
+            $query->where('date', $workDay);
         }
-        return AttendanceResource::collection($attendance);
+
+        $attendance = $query->paginate(20);
+
+        $data = AttendanceResource::collection($attendance)->resolve();
+        return response()->json([
+            'data' => $data,
+            'last_page' => $attendance->lastPage(),
+        ]);
     }
 
     public function startWorkDay()
@@ -67,8 +79,63 @@ class AttendanceController
         }
     }
 
+    public function checkIn(Request $request)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $employeeId = $request->input('employee_id');
 
+        if (!$employeeId) {
+            return response()->json(['message' => 'Employee ID is required.'], 400);
+        }
 
+        $attendance = Attendance::where('employee_id', $employeeId)
+            ->where('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            return response()->json(['message' => 'No attendance record found for today. Please contact administrator.'], 404);
+        }
+
+        if ($attendance->check_in_time) {
+            return response()->json(['message' => 'Already checked in for today.'], 400);
+        }
+
+        $attendance->update(['check_in_time' => now()]);
+
+        return response()->json([
+            'message' => 'Check-in successful.',
+            'check_in_time' => $attendance->fresh()->check_in_time
+        ], 200);
+    }
+
+    public function checkOut(Request $request)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $employeeId = $request->input('employee_id');
+
+        if (!$employeeId) {
+            return response()->json(['message' => 'Employee ID is required.'], 400);
+        }
+
+        $attendance = Attendance::where('employee_id', $employeeId)
+            ->where('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            return response()->json(['message' => 'No attendance record found for today. Please contact administrator.'], 404);
+        }
+
+        if ($attendance->check_out_time) {
+            return response()->json(['message' => 'Already checked out for today.'], 400);
+        }
+
+        $attendance->update(['check_out_time' => now()]);
+
+        return response()->json([
+            'message' => 'Check-out successful.',
+            'check_out_time' => $attendance->fresh()->check_out_time
+        ], 200);
+    }
 
     public function show(string $id)
     {

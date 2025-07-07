@@ -14,20 +14,29 @@ class PayrollController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $payrolls = Payroll::with(['employee.department'])->get();
-        if ($payrolls->isEmpty()) {
-            return response()->json(['message' => 'No payroll records found.'], 404);
+        $month = $request->query('month');
+        $year = $request->query('year');
+
+        $query = Payroll::with(['employee.department']);
+
+        if ($month && $year) {
+            $query->whereMonth('generated_at', $month)
+                ->whereYear('generated_at', $year);
+        } elseif ($month) {
+            $query->whereMonth('generated_at', $month);
+        } elseif ($year) {
+            $query->whereYear('generated_at', $year);
         }
-        return PayrollResource::collection($payrolls);
+
+        $payrolls = $query->orderByDesc('generated_at')->paginate(20);
+        $data = PayrollResource::collection($payrolls)->resolve();
+        return response()->json([
+            'data' => $data,
+            'last_page' => $payrolls->lastPage(),
+        ]);
     }
-
-
-
-
-
-
 
     public function show(string $id)
     {

@@ -225,4 +225,16 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password changed successfully, you can now log in'], 200);
     }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        if ($user) {
+            $user->tokens()->delete();
+            return response()->json([
+                'message' => 'Logged out successfully.'
+            ], 200);
+        }
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
 }

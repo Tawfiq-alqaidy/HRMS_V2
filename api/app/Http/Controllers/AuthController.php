@@ -101,7 +101,7 @@ class AuthController extends Controller
         }
         return response()->json([
             'message' => 'If the email is correct, you will receive a verification code',
-            'OTP => ' => $otp, // For testing purposes, remove in production
+            'OTP' => $otp, // For testing purposes, remove in production
         ], 200);
     }
 

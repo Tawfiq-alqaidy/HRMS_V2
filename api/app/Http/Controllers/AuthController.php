@@ -100,8 +100,7 @@ class AuthController extends Controller
             $user->notify((new SendOtpNotification($otp))->onQueue('default'));
         }
         return response()->json([
-            'message' => 'If the email is correct, you will receive a verification code',
-            'OTP' => $otp, // For testing purposes, remove in production
+            'message' => 'If the email is correct, you will receive a verification code' . (isset($otp) ? (': ' . $otp) : ''),
         ], 200);
     }
 

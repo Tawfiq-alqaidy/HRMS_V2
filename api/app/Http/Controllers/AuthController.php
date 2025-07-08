@@ -99,7 +99,10 @@ class AuthController extends Controller
             // Queue the notification
             $user->notify((new SendOtpNotification($otp))->onQueue('default'));
         }
-        return response()->json(['message' => 'If the email is correct, you will receive a verification code'], 200);
+        return response()->json([
+            'message' => 'If the email is correct, you will receive a verification code',
+            'OTP => ' => $otp, // For testing purposes, remove in production
+        ], 200);
     }
 
     // Stub for disposable email check (replace with real package or API)
@@ -159,35 +162,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'The verification code is incorrect or expired'], 422);
         }
 
-        // Check lockout
-        if ($record->failed_attempts >= 3 && $record->updated_at > now()->subMinutes(30)) {
-            return response()->json([
-                'message' => 'Too many failed attempts. Please try again after 30 minutes.'
-            ], 423);
-        }
 
-        // Check OTP and expiry
+        // Check OTP and expiry only
         if ($record->otp !== $request->otp || $record->expires_at < now()) {
-            // Increment failed_attempts
-            DB::table('password_resets')
-                ->where('email', $request->email)
-                ->update([
-                    'failed_attempts' => $record->failed_attempts + 1,
-                    'updated_at' => now(),
-                ]);
-            // Lockout if reached 3 attempts
-            if ($record->failed_attempts + 1 >= 3) {
-                return response()->json([
-                    'message' => 'Too many failed attempts. Please try again after 30 minutes.'
-                ], 423);
-            }
             return response()->json(['message' => 'The verification code is incorrect or expired'], 422);
         }
-
-        // Reset failed_attempts on success
-        DB::table('password_resets')
-            ->where('email', $request->email)
-            ->update(['failed_attempts' => 0]);
 
         return response()->json(['message' => 'Verification code verified successfully'], 200);
     }

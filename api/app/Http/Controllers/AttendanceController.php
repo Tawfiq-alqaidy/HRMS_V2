@@ -104,7 +104,6 @@ class AttendanceController
 
         return response()->json([
             'message' => 'Check-in successful.',
-            'check_in_time' => $attendance->fresh()->check_in_time
         ], 200);
     }
 
@@ -133,7 +132,6 @@ class AttendanceController
 
         return response()->json([
             'message' => 'Check-out successful.',
-            'check_out_time' => $attendance->fresh()->check_out_time
         ], 200);
     }
 
@@ -168,5 +166,14 @@ class AttendanceController
 
         $attendance->delete();
         return response()->json(['message' => 'Attendance record deleted successfully'], 200);
+    }
+
+
+    public function isWorkDayStarted()
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $attendance = Attendance::where('date', $today)->exists();
+
+        return response()->json(['work_day_started' => $attendance]);
     }
 }

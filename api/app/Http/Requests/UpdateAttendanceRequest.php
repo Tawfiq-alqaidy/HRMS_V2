@@ -22,8 +22,6 @@ class UpdateAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'employee_id' => 'sometimes|exists:employees,id',
-            'date' => 'sometimes|date',
             'check_in_time' => 'sometimes|date_format:H:i:s',
             'check_out_time' => 'nullable|date_format:H:i:s|after:check_in_time',
         ];

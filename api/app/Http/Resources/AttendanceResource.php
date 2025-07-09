@@ -21,7 +21,6 @@ class AttendanceResource extends JsonResource
             'date' => $this->date,
             'check_in_time' => $this->check_in_time,
             'check_out_time' => $this->check_out_time,
-            'employee' => new EmployeeResource($this->whenLoaded('employee')),
         ];
     }
 }

@@ -16,19 +16,23 @@ class AttendanceController
 
     public function index(Request $request)
     {
-        $workDay = $request->query('work_day');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        $employeeId = $request->query('employee_id');
 
-        $query = Attendance::with('employee');
-
-        if ($workDay) {
-            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $workDay)) {
-                return response()->json([
-                    'message' => 'Invalid date format. Please use YYYY-MM-DD format.'
-                ], 422);
-            }
-
-            $query->where('date', $workDay);
-        }
+        $query = Attendance::with('employee')
+            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                // Validate date formats
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+                    abort(response()->json([
+                        'message' => 'Invalid date format. Please use YYYY-MM-DD format for start_date and end_date.'
+                    ], 422));
+                }
+                $q->whereBetween('date', [$startDate, $endDate]);
+            })
+            ->when($employeeId, function ($q) use ($employeeId) {
+                $q->where('employee_id', $employeeId);
+            });
 
         $attendance = $query->paginate(20);
 

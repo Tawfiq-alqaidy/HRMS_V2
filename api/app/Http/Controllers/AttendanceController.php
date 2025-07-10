@@ -34,7 +34,7 @@ class AttendanceController
                 $q->where('employee_id', $employeeId);
             });
 
-        $attendance = $query->paginate(20);
+        $attendance = $query->orderBy('date', 'desc')->paginate(20);
 
         $data = AttendanceResource::collection($attendance)->resolve();
         return response()->json([

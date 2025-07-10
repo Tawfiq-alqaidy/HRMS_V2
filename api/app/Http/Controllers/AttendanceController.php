@@ -235,4 +235,26 @@ class AttendanceController
 
         return response()->json(['work_day_started' => $attendance]);
     }
+
+    public function attendanceAndDeparture(string $id)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $employeeId = $id;
+        if (!$employeeId) {
+            return response()->json(['message' => 'Employee ID is required.'], 400);
+        }
+
+        $attendance = Attendance::where('employee_id', $employeeId)
+            ->where('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            return response()->json(['message' => 'No attendance record found for today. Please contact administrator.'], 404);
+        }
+
+        return response()->json([
+            'check_in_time' => $attendance->check_in_time,
+            'check_out_time' => $attendance->check_out_time,
+        ]);
+    }
 }

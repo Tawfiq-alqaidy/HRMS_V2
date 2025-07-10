@@ -14,6 +14,7 @@ Route::prefix('attendance')->group(function () {
         return response('', 200);
     });
     Route::get('/{id}', [AttendanceController::class, 'show'])->name('attendance.show');
+    Route::get('/attendanceAndDeparture/{id}', [AttendanceController::class, 'attendanceAndDeparture'])->name('attendance.attendanceAndDeparture');
     Route::patch('/{id}', [AttendanceController::class, 'update'])->name('attendance.update');
     Route::delete('/{id}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
 });

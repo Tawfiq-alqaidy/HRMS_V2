@@ -41,12 +41,14 @@ class AuthController extends Controller
             // Assuming there is a relation or field to get employee id from user
             $employee = \App\Models\Employee::where('user_id', $user->id)->first();
             $employeeId = $employee ? $employee->id : null;
+            $employeePicture = $employee ? $employee->picture : null;
         }
         return response()->json([
             'token' => $token,
             'user_role' => $user->role,
             'user_id' => $userId,
             'employee_id' => $employeeId,
+            'employee_picture' => $employeePicture ?? null,
             'user_email' => $user->email,
         ]);
     }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 
@@ -41,7 +42,16 @@ class AuthController extends Controller
             // Assuming there is a relation or field to get employee id from user
             $employee = \App\Models\Employee::where('user_id', $user->id)->first();
             $employeeId = $employee ? $employee->id : null;
-            $employeePicture = $employee ? $employee->picture : null;
+            $employeePicture = null;
+            if ($employee && $employee->picture) {
+                // Generate full URL for the employee picture
+                if (Storage::disk('public')->exists($employee->picture)) {
+                    $employeePicture = url('storage/' . $employee->picture);
+                } else {
+                    // Fallback to asset helper 
+                    $employeePicture = asset('storage/' . $employee->picture);
+                }
+            }
         }
         return response()->json([
             'token' => $token,

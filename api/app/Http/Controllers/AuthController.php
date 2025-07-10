@@ -45,18 +45,18 @@ class AuthController extends Controller
             $employeeId = $employee ? $employee->id : null;
             $employeePicture = null;
             if ($employee && $employee->picture) {
-                // Generate full URL for the employee picture using direct serving route
+                // Generate full URL for the employee picture using dedicated route
                 $picturePath = $employee->picture;
                 $fileName = basename($picturePath);
 
                 // Check if the file exists in public storage
                 $fullPath = 'employees/photos/' . $fileName;
                 if (Storage::disk('public')->exists($fullPath)) {
-                    $employeePicture = url('storage/' . $fileName);
+                    $employeePicture = url('employee-photos/' . $fileName);
                 } else {
                     // Try the original path if the basename approach doesn't work
                     if (Storage::disk('public')->exists($picturePath)) {
-                        $employeePicture = url('storage/' . basename($picturePath));
+                        $employeePicture = url('employee-photos/' . basename($picturePath));
                     } else {
                         Log::info('Employee picture not found: ' . $picturePath . ' or ' . $fullPath);
                         $employeePicture = null;

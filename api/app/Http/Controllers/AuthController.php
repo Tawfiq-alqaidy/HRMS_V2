@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 
@@ -44,12 +45,22 @@ class AuthController extends Controller
             $employeeId = $employee ? $employee->id : null;
             $employeePicture = null;
             if ($employee && $employee->picture) {
-                // Generate full URL for the employee picture
-                if (Storage::disk('public')->exists($employee->picture)) {
-                    $employeePicture = url('storage/' . $employee->picture);
+                // Generate full URL for the employee picture using direct serving route
+                $picturePath = $employee->picture;
+                $fileName = basename($picturePath);
+
+                // Check if the file exists in public storage
+                $fullPath = 'employees/photos/' . $fileName;
+                if (Storage::disk('public')->exists($fullPath)) {
+                    $employeePicture = url('storage/' . $fileName);
                 } else {
-                    // Fallback to asset helper 
-                    $employeePicture = asset('storage/' . $employee->picture);
+                    // Try the original path if the basename approach doesn't work
+                    if (Storage::disk('public')->exists($picturePath)) {
+                        $employeePicture = url('storage/' . basename($picturePath));
+                    } else {
+                        Log::info('Employee picture not found: ' . $picturePath . ' or ' . $fullPath);
+                        $employeePicture = null;
+                    }
                 }
             }
         }

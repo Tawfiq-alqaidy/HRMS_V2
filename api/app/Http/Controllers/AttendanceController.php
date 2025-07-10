@@ -149,15 +149,70 @@ class AttendanceController
     }
 
 
-    public function update(UpdateAttendanceRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
-        $attendance = Attendance::find($id);
-        if (!$attendance) {
-            return response()->json(['message' => 'Attendance record not found'], 404);
+        try {
+            $attendance = Attendance::find($id);
+            if (!$attendance) {
+                return response()->json(['message' => 'Attendance record not found'], 404);
+            }
+
+            // More flexible validation - accept both time formats and datetime
+            $rules = [
+                'check_in_time' => 'sometimes|nullable',
+                'check_out_time' => 'sometimes|nullable',
+                'date' => 'sometimes|date_format:Y-m-d',
+                'employee_id' => 'sometimes|exists:employees,id',
+            ];
+
+            $validatedData = $request->validate($rules);
+
+            // Convert time formats if needed
+            if (isset($validatedData['check_in_time'])) {
+                $validatedData['check_in_time'] = $this->parseTime($validatedData['check_in_time']);
+            }
+            if (isset($validatedData['check_out_time'])) {
+                $validatedData['check_out_time'] = $this->parseTime($validatedData['check_out_time']);
+            }
+
+            $attendance->update($validatedData);
+
+            return response()->json([
+                'message' => 'Attendance record updated successfully',
+            ], 200);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Update failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function parseTime($time)
+    {
+        if (!$time) return null;
+
+        // If it's already a datetime, return as is
+        if (strpos($time, ' ') !== false) {
+            return $time;
         }
 
-        $attendance->update($request->validated());
-        return response()->json(['message' => 'Attendance record updated successfully',], 200);
+        // If it's just time, return as is
+        if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
+            return $time;
+        }
+
+        // Try to parse other formats
+        try {
+            return \Carbon\Carbon::parse($time)->format('H:i:s');
+        } catch (\Exception $e) {
+            return $time; // Return as is if can't parse
+        }
     }
 
 
